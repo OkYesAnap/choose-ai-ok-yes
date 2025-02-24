@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react";
-import {headerLinks, routeHeader} from "@/constants/header";
+import {headerLinks, routeHeader} from "@/constants/main";
 import Link from "next/link";
 import {useParams} from "next/navigation";
 

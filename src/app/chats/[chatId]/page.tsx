@@ -1,38 +1,35 @@
 "use client"
-import React from "react";
+import React, { ChangeEventHandler, useEffect, useState } from "react";
 import Header from "@/components/Header";
-import {useDispatch, useSelector} from "react-redux";
-import {AppDispatch, example} from "@/redux/store";
-import {increment, setValue} from "@/redux/slice";
+import { messages } from "@/redux/store";
+import { useSelector, useDispatch } from "react-redux";
+import { add, fetchMessages } from "@/redux/messagesSlice";
+import { EngineRole } from "@/services/gptApi";
+
 
 const ChatPage: React.FC = () => {
-	const examp = useSelector(example);
-	const dispatch = useDispatch<AppDispatch>();
+	const chatMessages = useSelector(messages);
+	const dispatch = useDispatch();
+	const [text, setText] = useState<string>();
+	console.log(chatMessages);
 
-	const handleIncrement = () => {
-		dispatch(increment())
+	const handleChangeText: ChangeEventHandler<HTMLTextAreaElement> = (e) => {
+		setText(e.target.value)
 	}
 
-	const handleSet = () => {
-		dispatch(setValue(100))
-	}
-
-	return (<div className="flex flex-row mt-10">
-		<Header/>
-		<div>{examp}</div>
-		<button
-			className="p-2 bg-red-500 text-white rounded"
-			onClick={handleIncrement}
-		>
-			Increment
-		</button>
-		<button
-			className="p-2 bg-red-500 text-white rounded"
-			onClick={handleSet}
-		>
-			SetVal
-		</button>
+	return (<div className="flex flex-col mt-10">
+		<Header />
+		{chatMessages.map((message, i) => (<div key={i}>
+			{message.content}
+		</div>))}
+		<button onClick={async () => {
+			const newMessage = { role: EngineRole.user, content: text || '' }
+			dispatch(add(newMessage));
+			dispatch(fetchMessages([...chatMessages, newMessage]));
+		}}>Click</button>
+		{text}
+		<textarea className="color-black" name="Message" id="input-message" onChange={handleChangeText}></textarea>
 	</div>)
 }
 
-export default ChatPage
+export default ChatPage;

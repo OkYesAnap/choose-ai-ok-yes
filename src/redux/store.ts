@@ -1,9 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import {exampleSlicer} from './slice';
+import messageSlicer from './messagesSlice';
 
 const store = configureStore({
 	reducer: {
-		example: exampleSlicer,
+		messages: messageSlicer,
 	},
 });
 
@@ -11,6 +11,6 @@ export type RootState = ReturnType<typeof store.getState>;
 
 export type AppDispatch = typeof store.dispatch;
 
-export const example = (state: RootState) => state.example.value;
+export const messages = (state: RootState) => state.messages;
 
 export default store;
