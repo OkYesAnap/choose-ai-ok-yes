@@ -15,11 +15,14 @@ export enum EngineRole {
 
 const validEngineRoles = new Set(['system', 'assistant', 'user', 'function', 'tool', 'developer'])
 
+export enum requestStatus {"idle", "pending", "success", "error"}
+
 export interface IEngineMessage {
-	content: string,
-	role: EngineRole,
-	engine?: Engines,
-	model?: ModelTypes
+	content: string;
+	role: EngineRole;
+	engine?: Engines;
+	model?: ModelTypes;
+	status: requestStatus;
 }
 
 class ContextEngine {
@@ -51,61 +54,61 @@ class ContextEngine {
 
 export const contextEngine = new ContextEngine();
 
-export const requestToEngine = async (message: IEngineMessage, params: { sysMessage: IEngineMessage[] }) => {
+// export const requestToEngine = async (message: IEngineMessage, params: { sysMessage: IEngineMessage[] }) => {
 
-	const currentEngine = engines[message?.engine || "gpt"];
-	contextEngine.update(message);
-	const messageWithoutCustomRoles = contextEngine.get().filter((item: IEngineMessage) => validEngineRoles.has(item.role));
-	const apiRequestBody = {
-		"model": message.model,
-		"messages": [
-			...params.sysMessage,
-			...messageWithoutCustomRoles,
-		]
-	};
-	try {
-		const response = await fetch(currentEngine.chatUrl,
-			{
-				method: "POST",
-				headers: {
-					"Authorization": "Bearer " + keys[message?.engine || "gpt"],
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify(apiRequestBody)
-			});
+// 	const currentEngine = engines[message?.engine || "gpt"];
+// 	contextEngine.update(message);
+// 	const messageWithoutCustomRoles = contextEngine.get().filter((item: IEngineMessage) => validEngineRoles.has(item.role));
+// 	const apiRequestBody = {
+// 		"model": message.model,
+// 		"messages": [
+// 			...params.sysMessage,
+// 			...messageWithoutCustomRoles,
+// 		]
+// 	};
+// 	try {
+// 		const response = await fetch(currentEngine.chatUrl,
+// 			{
+// 				method: "POST",
+// 				headers: {
+// 					"Authorization": "Bearer " + keys[message?.engine || "gpt"],
+// 					"Content-Type": "application/json"
+// 				},
+// 				body: JSON.stringify(apiRequestBody)
+// 			});
 
-		const data = await response.json();
+// 		const data = await response.json();
 
-		let content = data.error?.message;
+// 		let content = data.error?.message;
 
-		if (response.status === 401) {
-			content += ApiKeyInstructions;
-		}
+// 		if (response.status === 401) {
+// 			content += ApiKeyInstructions;
+// 		}
 
-		if (data?.error) {
-			return contextEngine.update({
-				content,
-				role: EngineRole.error,
-				engine: message.engine
-			})
-		}
+// 		if (data?.error) {
+// 			return contextEngine.update({
+// 				content,
+// 				role: EngineRole.error,
+// 				engine: message.engine
+// 			})
+// 		}
 
-		return contextEngine.update({...data.choices[0].message, engine: message.engine})
+// 		return contextEngine.update({...data.choices[0].message, engine: message.engine})
 
-	} catch (error) {
-		let errorMessage: string;
-		if (error instanceof Error) {
-			errorMessage = error.message;
-		} else {
-			errorMessage = "Unknown error!"
-		}
-		return contextEngine.update({
-			content: errorMessage,
-			role: EngineRole.error,
-			engine: message.engine
-		})
-	}
-};
+// 	} catch (error) {
+// 		let errorMessage: string;
+// 		if (error instanceof Error) {
+// 			errorMessage = error.message;
+// 		} else {
+// 			errorMessage = "Unknown error!"
+// 		}
+// 		return contextEngine.update({
+// 			content: errorMessage,
+// 			role: EngineRole.error,
+// 			engine: message.engine
+// 		})
+// 	}
+// };
 
 export const sendAudioToServer = async (audioBlob: Blob) => {
 	let textTranscription: string = '';

@@ -1,12 +1,14 @@
-import { engines } from '@/constants/main';
-import { EngineRole, IEngineMessage, keys, requestToEngine } from '@/services/gptApi';
+import { EngineRole, IEngineMessage, keys, requestStatus } from '@/services/gptApi';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { EngineParams } from './engineParamsSlice';
 
 
+// export type requestStatus = "idle" | "pending" | "success" | "error"
+
 const developerInitialState: IEngineMessage = {
 	role: EngineRole.system,
+	status: requestStatus.idle,
 	content: `you are software professional with 5 years of experience. 
 		expert new Next.js version 13+ !impotent 
 		applications structure, src/app/page.tsx
@@ -16,7 +18,7 @@ const developerInitialState: IEngineMessage = {
 		`
 }
 
-export const fetchMessages = createAsyncThunk<string, {messages:IEngineMessage[], params: EngineParams}>(
+export const fetchMessages = createAsyncThunk<MessagesDTO, {messages:IEngineMessage[], params: EngineParams}>(
 	'messages/fetchMessages', 
 	async ({messages, params}) => {
 	const apiRequestBody = { messages, model: params.models.current };
@@ -33,27 +35,29 @@ export const fetchMessages = createAsyncThunk<string, {messages:IEngineMessage[]
 
 const initialState: IEngineMessage[] = [developerInitialState]
 
+interface MessagesDTO {
+	choices: Array<{message: any}>;
+}
+
 const messagesSlice = createSlice({
 	name: 'messages',
 	initialState,
 	reducers: {
 		add: (state, action: PayloadAction<IEngineMessage>) => {
-			state = [...state, action.payload];
-			return state;
+			state.push(action.payload);
 		},
 		remove: (state, action: PayloadAction<number>) => {
 			state.splice(action.payload, 1);
-			return state;
 		},
 		setMessages: (state, action: PayloadAction<Array<IEngineMessage>>) => {
-			return state;
+			return action.payload;
 		},
 	},
 	extraReducers: (builder) => {
 		builder.
-			addCase(fetchMessages.fulfilled, (state, action: PayloadAction<any>) => {
-				state = [...state, action.payload.choices[0].message];
-				return state;
+			addCase(fetchMessages.fulfilled, (state, action: PayloadAction<MessagesDTO>) => {
+				console.log(action.payload, '<<<<<<<');
+				state.push({...action.payload.choices[0].message, status: requestStatus.success});
 			})
 	}
 });
