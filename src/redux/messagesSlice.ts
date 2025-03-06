@@ -1,10 +1,23 @@
 import { EngineRole, IEngineMessage, keys, requestStatus } from '@/services/gptApi';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { EngineParams } from './engineParamsSlice';
-
 
 // export type requestStatus = "idle" | "pending" | "success" | "error"
+
+type EngineTypes = "gpt" | "deepseek"
+
+export interface EngineParams {
+    name: EngineTypes,
+    models: {
+        current: number,
+        available: string[]
+    },
+    urls: {
+		chat: string
+		audio?: string;
+	}
+}
+
 
 const developerInitialState: IEngineMessage = {
 	role: EngineRole.system,
@@ -18,25 +31,26 @@ const developerInitialState: IEngineMessage = {
 		`
 }
 
-export const fetchMessages = createAsyncThunk<MessagesDTO, {messages:IEngineMessage[], params: EngineParams}>(
-	'messages/fetchMessages', 
-	async ({messages, params}) => {
-	const apiRequestBody = { messages, model: params.models.current };
-	const response = await axios.post(params.urls.chat, apiRequestBody,
-		{
-			headers: {
-				"Authorization": "Bearer " + keys[params.name],
-				"Content-Type": "application/json"
-			}
-		});
-	return response.data;
-});
+export const fetchMessages = createAsyncThunk<MessagesDTO, { messages: IEngineMessage[], params: EngineParams }>(
+	'messages/fetchMessages',
+	async ({ messages, params }) => {
+		const { available, current } = params.models;
+		const apiRequestBody = { messages, model: available[current] };
+		const response = await axios.post(params.urls.chat, apiRequestBody,
+			{
+				headers: {
+					"Authorization": "Bearer " + keys[params.name],
+					"Content-Type": "application/json"
+				}
+			});
+		return response.data;
+	});
 
 
 const initialState: IEngineMessage[] = [developerInitialState]
 
 interface MessagesDTO {
-	choices: Array<{message: any}>;
+	choices: Array<{ message: any }>;
 }
 
 const messagesSlice = createSlice({
@@ -57,7 +71,7 @@ const messagesSlice = createSlice({
 		builder.
 			addCase(fetchMessages.fulfilled, (state, action: PayloadAction<MessagesDTO>) => {
 				console.log(action.payload, '<<<<<<<');
-				state.push({...action.payload.choices[0].message, status: requestStatus.success});
+				state.push({ ...action.payload.choices[0].message, status: requestStatus.success });
 			})
 	}
 });

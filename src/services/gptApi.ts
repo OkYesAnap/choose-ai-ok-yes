@@ -1,8 +1,8 @@
-import {ApiKeyInstructions, Engines, ModelTypes, engines} from "@/constants/main";
+import {Engines, ModelTypes, engines} from "@/constants/main";
 
 export const keys = {
 	gpt: process.env.NEXT_PUBLIC_GPT_API_KEY,
-	deepSeek: process.env.NEXT_PUBLIC_DEEP_SEEK_API_KEY
+	deepseek: process.env.NEXT_PUBLIC_DEEP_SEEK_API_KEY
 }
 
 export enum EngineRole {
@@ -22,7 +22,7 @@ export interface IEngineMessage {
 	role: EngineRole;
 	engine?: Engines;
 	model?: ModelTypes;
-	status: requestStatus;
+	status?: requestStatus;
 }
 
 class ContextEngine {

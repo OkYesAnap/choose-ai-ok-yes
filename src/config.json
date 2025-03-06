@@ -1,0 +1,32 @@
+{   "currentEngine": 0,
+    "config":[
+    {
+        "name": "gpt",
+        "urls": {
+            "chat": "https://api.openai.com/v1/chat/completions",
+            "audio": "https://api.openai.com/v1/audio/transcriptions"
+        },
+        "models": {
+            "available": [
+                "gpt-4o-mini",
+                "gpt-4o",
+                "gpt-maxi",
+                "gpt-gogogo"
+            ],
+            "current": 0
+        }
+    },
+    {
+        "name": "deepseek",
+        "urls": {
+            "chat": "https://api.deepseek.com/chat/completions"
+        },
+        "models": {
+            "available": [
+                "deepseek-chat",
+                "deepseek-reasoner"
+            ],
+            "current": 0
+        }
+    }
+]}

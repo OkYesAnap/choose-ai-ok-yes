@@ -1,64 +1,20 @@
-import { Engines } from "@/constants/main";
-import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import params from "@/config.json";
 
-export type GptModelTypes = "gpt-4o-mini" | "gpt-4o" | ""
-export type DeepseekModelTypes = "deepseek-chat" | "deepseek-reasoner" | ""
+const { config } = params;
 
-interface Urls {
-    chat: string;
-    audio?: string;
-}
-
-const gptUrls: Urls = {
-    chat: "https://api.openai.com/v1/chat/completions",
-    audio: "https://api.openai.com/v1/audio/transcriptions"
-}
-const deepSeekUrls: Urls = {
-    chat: "https://api.deepseek.com/chat/completions"
-}
-
-
-export interface EngineParams {
-    name: Engines,
-    models: {
-        current: GptModelTypes | DeepseekModelTypes,
-        availableModels: GptModelTypes[] | DeepseekModelTypes[];
-    },
-    urls: Urls
-}
-
-const defaultGpt: EngineParams = {
-    name: Engines.GPT,
-    models: {
-        current: '',
-        availableModels: ['gpt-4o-mini', 'gpt-4o'],
-    }, urls: gptUrls
-}
-
-const defaulDeepseek: EngineParams = {
-    name: Engines.DEEP_SEEK,
-    models: {
-        current: '',
-        availableModels: ['deepseek-chat', 'deepseek-reasoner'],
-    },
-    urls: deepSeekUrls
-}
-
-export const EnginesParams: { [key in Engines]: EngineParams } = {
-    [Engines.GPT]: defaultGpt,
-    [Engines.DEEP_SEEK]: defaulDeepseek
-}
+export const enginesNamesList = config.map(engine => engine.name);
 
 const engineParamsSlice = createSlice({
     name: 'engineParams',
-    initialState: EnginesParams[Engines.GPT],
+    initialState: params,
     reducers: {
-        changeModel: (state, action: PayloadAction<GptModelTypes | DeepseekModelTypes>) => {
-            state = { ...state, models: { ...state.models, current: action.payload } };
-            return state;
+        changeModel: (state, action: PayloadAction<number>) => {
+            const {currentEngine} = state
+            state.config[currentEngine].models.current = action.payload;
         },
-        changeEngine: (state, action: PayloadAction<Engines>) => {
-            state = EnginesParams[action.payload];
+        changeEngine: (state, action: PayloadAction<number>) => {
+            state.currentEngine = action.payload;
             return state;
         }
     }
